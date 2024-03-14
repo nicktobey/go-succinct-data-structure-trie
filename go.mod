@@ -1,3 +1,3 @@
-module github.com/siongui/go-succinct-data-structure-trie
+module github.com/nicktobey/go-succinct-data-structure-trie
 
 go 1.17
