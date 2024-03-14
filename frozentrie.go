@@ -125,3 +125,41 @@ func (f *FrozenTrie) Lookup(word string) bool {
 
 	return node.final
 }
+
+func (f *FrozenTrie) LookupIndex(word string) (index uint, found bool) {
+	node := f.GetRoot()
+	wordBytes := []byte(word)
+	for _, i := range wordBytes {
+		var child FrozenTrieNode
+		var j uint = 0
+		for ; j < node.GetChildCount(); j++ {
+			child = node.GetChild(j)
+			if child.letter == i {
+				break
+			}
+		}
+
+		if j == node.GetChildCount() {
+			return 0, false
+		}
+		node = child
+	}
+
+	return node.index, node.final
+}
+
+/*
+* Apply a function to each node, traversing the trie in level order.
+ */
+func (t *FrozenTrie) Apply(fn func(FrozenTrieNode)) {
+	var level []FrozenTrieNode
+	level = append(level, t.GetRoot())
+	for len(level) > 0 {
+		node := level[0]
+		level = level[1:]
+		for i := uint(0); i < node.GetChildCount(); i++ {
+			level = append(level, node.GetChild(i))
+		}
+		fn(node)
+	}
+}
