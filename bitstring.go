@@ -1,17 +1,22 @@
 package bits
 
-/**
-  Given a string of data (eg, in BASE-64), the BitString class supports
-  reading or counting a number of bits from an arbitrary position in the
-  string.
+/*
+*
+
+	Given a string of data (eg, in BASE-64), the BitString class supports
+	reading or counting a number of bits from an arbitrary position in the
+	string.
 */
 type BitString struct {
-	base64DataString string
-	length           uint
+	data   string
+	length uint
 }
 
-var MaskTop = [7]uint{
-	0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00,
+// W is the width of a byte in bits
+const W = 8
+
+var MaskTop = [9]uint8{
+	0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00,
 }
 
 var BitsInByte = [256]uint{
@@ -29,33 +34,36 @@ var BitsInByte = [256]uint{
 }
 
 func (bs *BitString) Init(data string) {
-	bs.base64DataString = data
-	bs.length = uint(len(bs.base64DataString)) * W
+	bs.data = data
+	bs.length = uint(len(bs.data)) * 8
 }
 
-/**
-  Returns the internal string of bytes
+/*
+*
+
+	Returns the internal string of bytes
 */
 func (bs *BitString) GetData() string {
-	return bs.base64DataString
+	return bs.data
 }
 
-/**
-  Returns a decimal number, consisting of a certain number, n, of bits
-  starting at a certain position, p.
+/*
+*
+
+	Returns a decimal number, consisting of a certain number, n, of bits
+	starting at a certain position, p.
 */
 func (bs *BitString) Get(p, n uint) uint {
 
 	// case 1: bits lie within the given byte
 	if (p%W)+n <= W {
 		idx := p/W | 0
-		return (ORD(bs.base64DataString[idx:idx+1]) & MaskTop[p%W]) >>
-			(W - p%W - n)
+		return uint((bs.data[idx] & MaskTop[p%W]) >> (W - p%W - n))
 
 		// case 2: bits lie incompletely in the given byte
 	} else {
 		idx := p/W | 0
-		result := (ORD(bs.base64DataString[idx:idx+1]) & MaskTop[p%W])
+		result := uint(bs.data[idx] & MaskTop[p%W])
 
 		l := W - p%W
 		p += l
@@ -63,24 +71,26 @@ func (bs *BitString) Get(p, n uint) uint {
 
 		for n >= W {
 			idx := p/W | 0
-			result = (result << W) | ORD(bs.base64DataString[idx:idx+1])
+			result = (result << W) | uint(bs.data[idx])
 			p += W
 			n -= W
 		}
 
 		if n > 0 {
 			idx := p/W | 0
-			result = (result << n) | (ORD(bs.base64DataString[idx:idx+1]) >>
-				(W - n))
+			result = (result << n) | uint(bs.data[idx]>>
+				(W-n))
 		}
 
 		return result
 	}
 }
 
-/**
-  Counts the number of bits set to 1 starting at position p and
-  ending at position p + n
+/*
+*
+
+	Counts the number of bits set to 1 starting at position p and
+	ending at position p + n
 */
 func (bs *BitString) Count(p, n uint) uint {
 
@@ -94,9 +104,11 @@ func (bs *BitString) Count(p, n uint) uint {
 	return count + BitsInByte[bs.Get(p, n)]
 }
 
-/**
-  Returns the number of bits set to 1 up to and including position x.
-  This is the slow implementation used for testing.
+/*
+*
+
+	Returns the number of bits set to 1 up to and including position x.
+	This is the slow implementation used for testing.
 */
 func (bs *BitString) Rank(x uint) uint {
 	var rank uint = 0

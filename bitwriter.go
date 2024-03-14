@@ -1,19 +1,26 @@
 package bits
 
-import "strings"
+import (
+	"bytes"
+	"strings"
+)
 
-/**
-  The BitWriter will create a stream of bytes, letting you write a certain
-  number of bits at a time. This is part of the encoder, so it is not
-  optimized for memory or speed.
+/*
+*
+
+	The BitWriter will create a stream of bytes, letting you write a certain
+	number of bits at a time. This is part of the encoder, so it is not
+	optimized for memory or speed.
 */
 type BitWriter struct {
-	bits []uint
+	bits []uint8
 }
 
-/**
-  Write some data to the bit string. The number of bits must be 32 or
-  fewer.
+/*
+*
+
+	Write some data to the bit string. The number of bits must be 32 or
+	fewer.
 */
 func (bw *BitWriter) Write(data, numBits uint) {
 	//for i := (numBits-1); i >= 0; i-- {
@@ -32,32 +39,36 @@ func (bw *BitWriter) Write(data, numBits uint) {
 	}
 }
 
-/**
-  Get the bitstring represented as a javascript string of bytes
+/*
+*
+
+	Get the bitstring represented as a javascript string of bytes
 */
 func (bw *BitWriter) GetData() string {
-	var chars []string
-	var b, i uint = 0, 0
+	var chars bytes.Buffer
+	var b, i uint8 = 0, 0
 
 	for j := 0; j < len(bw.bits); j++ {
 		b = (b << 1) | bw.bits[j]
 		i += 1
-		if i == W {
-			chars = append(chars, CHR(b))
+		if i == 8 {
+			chars.WriteByte(b)
 			i = 0
 			b = 0
 		}
 	}
 
 	if i != 0 {
-		chars = append(chars, CHR(b<<(W-i)))
+		chars.WriteByte(b << (8 - i))
 	}
 
-	return strings.Join(chars, "")
+	return chars.String()
 }
 
-/**
-  Returns the bits as a human readable binary string for debugging
+/*
+*
+
+	Returns the bits as a human readable binary string for debugging
 */
 func (bw *BitWriter) GetDebugString(group uint) string {
 	var chars []string
