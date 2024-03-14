@@ -7,12 +7,14 @@ import "unicode/utf8"
 // https://blog.golang.org/strings
 // https://golang.org/pkg/unicode/utf8/
 
-/**
-  A Trie node, for use in building the encoding trie. This is not needed for
-  the decoder.
+/*
+*
+
+	A Trie node, for use in building the encoding trie. This is not needed for
+	the decoder.
 */
 type TrieNode struct {
-	letter   string
+	letter   byte
 	final    bool
 	children []*TrieNode
 }
@@ -27,23 +29,27 @@ type Trie struct {
 func (t *Trie) Init() {
 	t.previousWord = ""
 	t.root = &TrieNode{
-		letter: " ",
+		letter: 0,
 		final:  false,
 	}
 	t.cache = append(t.cache, t.root)
 	t.nodeCount = 1
 }
 
-/**
-  Returns the number of nodes in the trie
+/*
+*
+
+	Returns the number of nodes in the trie
 */
 func (t *Trie) GetNodeCount() uint {
 	return t.nodeCount
 }
 
-/**
-  Inserts a word into the trie. This function is fastest if the words are
-  inserted in alphabetical order.
+/*
+*
+
+	Inserts a word into the trie. This function is fastest if the words are
+	inserted in alphabetical order.
 */
 func (t *Trie) Insert(word string) {
 
@@ -67,13 +73,12 @@ func (t *Trie) Insert(word string) {
 	t.cache = t.cache[:commonRuneCount+1]
 	node := t.cache[commonRuneCount]
 
-	for i, w := commonPrefixWidth, 0; i < len(word); i += w {
+	wordBytes := []byte(word)
+	for _, i := range wordBytes {
 		// fix the bug if words not inserted in alphabetical order
 		isLetterExist := false
-		runeValue, width := utf8.DecodeRuneInString(word[i:])
-		w = width
 		for _, cld := range node.children {
-			if cld.letter == string(runeValue) {
+			if cld.letter == i {
 				t.cache = append(t.cache, cld)
 				node = cld
 				isLetterExist = true
@@ -85,7 +90,7 @@ func (t *Trie) Insert(word string) {
 		}
 
 		next := &TrieNode{
-			letter: string(runeValue),
+			letter: i,
 			final:  false,
 		}
 		t.nodeCount++
@@ -98,8 +103,10 @@ func (t *Trie) Insert(word string) {
 	t.previousWord = word
 }
 
-/**
-  Apply a function to each node, traversing the trie in level order.
+/*
+*
+
+	Apply a function to each node, traversing the trie in level order.
 */
 func (t *Trie) Apply(fn func(*TrieNode)) {
 	var level []*TrieNode
@@ -114,9 +121,21 @@ func (t *Trie) Apply(fn func(*TrieNode)) {
 	}
 }
 
-/**
-  Encode the trie and all of its nodes. Returns a string representing the
-  encoded data.
+/*
+* Apply a function to each node, traversing the trie in pre-order.
+ */
+func (f *TrieNode) ApplyPreOrder(fn func(*TrieNode)) {
+	for _, child := range f.children {
+		child.ApplyPreOrder(fn)
+	}
+	fn(f)
+}
+
+/*
+*
+
+	Encode the trie and all of its nodes. Returns a string representing the
+	encoded data.
 */
 func (t *Trie) Encode() string {
 	// Write the unary encoding of the tree in level order.
@@ -133,15 +152,13 @@ func (t *Trie) Encode() string {
 	// 1 bit stores the "final" indicator. The other (dataBits-1) bits store
 	// one of the characters of the alphabet.
 	t.Apply(func(node *TrieNode) {
-		value, ok := mapCharToUint[node.letter]
-		if !ok {
-			panic("illegal character:" + node.letter)
-		}
 		if node.final {
-			value |= (1 << (dataBits - 1))
+			bits.Write(1, 1)
+		} else {
+			bits.Write(0, 1)
 		}
 
-		bits.Write(uint(value), dataBits)
+		bits.Write(uint(node.letter), dataBits-1)
 	})
 
 	return bits.GetData()

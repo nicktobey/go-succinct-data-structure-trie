@@ -1,45 +1,51 @@
 package bits
 
-import "unicode/utf8"
+/*
+*
 
-/**
-  This class is used for traversing the succinctly encoded trie.
+	This class is used for traversing the succinctly encoded trie.
 */
 type FrozenTrieNode struct {
 	trie       *FrozenTrie
 	index      uint
-	letter     string
+	letter     byte
 	final      bool
 	firstChild uint
 	childCount uint
 }
 
-/**
-  Returns the number of children.
+/*
+*
+
+	Returns the number of children.
 */
 func (f *FrozenTrieNode) GetChildCount() uint {
 	return f.childCount
 }
 
-/**
-  Returns the FrozenTrieNode for the given child.
+/*
+*
 
-  @param index The 0-based index of the child of this node. For example, if
-  the node has 5 children, and you wanted the 0th one, pass in 0.
+	Returns the FrozenTrieNode for the given child.
+
+	@param index The 0-based index of the child of this node. For example, if
+	the node has 5 children, and you wanted the 0th one, pass in 0.
 */
 func (f *FrozenTrieNode) GetChild(index uint) FrozenTrieNode {
 	return f.trie.GetNodeByIndex(f.firstChild + index)
 }
 
-/**
-  The FrozenTrie is used for looking up words in the encoded trie.
+/*
+*
 
-  @param data A string representing the encoded trie.
+	The FrozenTrie is used for looking up words in the encoded trie.
 
-  @param directoryData A string representing the RankDirectory. The global L1
-  and L2 constants are used to determine the L1Size and L2size.
+	@param data A string representing the encoded trie.
 
-  @param nodeCount The number of nodes in the trie.
+	@param directoryData A string representing the RankDirectory. The global L1
+	and L2 constants are used to determine the L1Size and L2size.
+
+	@param nodeCount The number of nodes in the trie.
 */
 type FrozenTrie struct {
 	data        BitString
@@ -56,17 +62,16 @@ func (f *FrozenTrie) Init(data, directoryData string, nodeCount uint) {
 	f.letterStart = nodeCount*2 + 1
 }
 
-/**
-  Retrieve the FrozenTrieNode of the trie, given its index in level-order.
-  This is a private function that you don't have to use.
+/*
+*
+
+	Retrieve the FrozenTrieNode of the trie, given its index in level-order.
+	This is a private function that you don't have to use.
 */
 func (f *FrozenTrie) GetNodeByIndex(index uint) FrozenTrieNode {
 	// retrieve the (dataBits)-bit letter.
 	final := (f.data.Get(f.letterStart+index*dataBits, 1) == 1)
-	letter, ok := mapUintToChar[f.data.Get(f.letterStart+index*dataBits+1, (dataBits-1))]
-	if !ok {
-		panic("illegal: bits -> char failed")
-	}
+	letter := uint8(f.data.Get(f.letterStart+index*dataBits+1, (dataBits - 1)))
 	firstChild := f.directory.Select(0, index+1) - index
 
 	// Since the nodes are in level order, this nodes children must go up
@@ -83,28 +88,31 @@ func (f *FrozenTrie) GetNodeByIndex(index uint) FrozenTrieNode {
 	}
 }
 
-/**
-  Retrieve the root node. You can use this node to obtain all of the other
-  nodes in the trie.
+/*
+*
+
+	Retrieve the root node. You can use this node to obtain all of the other
+	nodes in the trie.
 */
 func (f *FrozenTrie) GetRoot() FrozenTrieNode {
 	return f.GetNodeByIndex(0)
 }
 
-/**
-  Look-up a word in the trie. Returns true if and only if the word exists
-  in the trie.
+/*
+*
+
+	Look-up a word in the trie. Returns true if and only if the word exists
+	in the trie.
 */
 func (f *FrozenTrie) Lookup(word string) bool {
 	node := f.GetRoot()
-	for i, w := 0, 0; i < len(word); i += w {
-		runeValue, width := utf8.DecodeRuneInString(word[i:])
-		w = width
+	wordBytes := []byte(word)
+	for _, i := range wordBytes {
 		var child FrozenTrieNode
 		var j uint = 0
 		for ; j < node.GetChildCount(); j++ {
 			child = node.GetChild(j)
-			if child.letter == string(runeValue) {
+			if child.letter == i {
 				break
 			}
 		}

@@ -9,12 +9,13 @@ func (f *FrozenTrie) GetSuggestedWords(word string, limit int) []string {
 	node := f.GetRoot()
 
 	// find the node corresponding to the last char of input
-	for _, runeValue := range word {
+	wordBytes := []byte(word)
+	for _, i := range wordBytes {
 		var child FrozenTrieNode
 		var j uint = 0
 		for ; j < node.GetChildCount(); j++ {
 			child = node.GetChild(j)
-			if child.letter == string(runeValue) {
+			if child.letter == i {
 				break
 			}
 		}
@@ -37,8 +38,8 @@ func (f *FrozenTrie) traverseSubTrie(node FrozenTrieNode, prefix string, limit i
 
 	var level []FrozenTrieNode
 	level = append(level, node)
-	var prefixLevel []string
-	prefixLevel = append(prefixLevel, prefix)
+	var prefixLevel [][]byte
+	prefixLevel = append(prefixLevel, []byte(prefix))
 
 	for len(level) > 0 {
 		nodeNow := level[0]
@@ -48,7 +49,7 @@ func (f *FrozenTrie) traverseSubTrie(node FrozenTrieNode, prefix string, limit i
 
 		// if the prefix is a legal word.
 		if nodeNow.final {
-			result = append(result, prefixNow)
+			result = append(result, string(prefixNow))
 			if len(result) > limit {
 				return result
 			}
@@ -58,7 +59,7 @@ func (f *FrozenTrie) traverseSubTrie(node FrozenTrieNode, prefix string, limit i
 		for ; i < nodeNow.GetChildCount(); i++ {
 			child := nodeNow.GetChild(i)
 			level = append(level, child)
-			prefixLevel = append(prefixLevel, prefixNow+child.letter)
+			prefixLevel = append(prefixLevel, append(prefixNow, child.letter))
 		}
 	}
 

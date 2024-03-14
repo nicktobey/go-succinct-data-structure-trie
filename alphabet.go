@@ -6,7 +6,7 @@ package bits
 
 import "strings"
 
-//var allowedCharacters = "abcdeghijklmnoprstuvyāīūṁṃŋṇṅñṭḍḷ…'’° -"
+// var allowedCharacters = "abcdeghijklmnoprstuvyāīūṁṃŋṇṅñṭḍḷ…'’° -"
 var allowedCharacters = "abcdefghijklmnopqrstuvwxyz "
 var mapCharToUint = getCharToUintMap(allowedCharacters)
 var mapUintToChar = getUintToCharMap(mapCharToUint)
@@ -17,7 +17,7 @@ var mapUintToChar = getUintToCharMap(mapCharToUint)
  * 1 bit stores the "final" indicator. The other bits store one of the
  * characters of the alphabet.
  */
-var dataBits = getDataBits(allowedCharacters)
+var dataBits uint = 9
 
 func SetAllowedCharacters(alphabet string) {
 	allowedCharacters = alphabet
