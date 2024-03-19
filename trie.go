@@ -73,7 +73,7 @@ func (t *Trie) Insert(word string) {
 	t.cache = t.cache[:commonRuneCount+1]
 	node := t.cache[commonRuneCount]
 
-	wordBytes := []byte(word)
+	wordBytes := []byte(word)[commonRuneCount:]
 	for _, i := range wordBytes {
 		// fix the bug if words not inserted in alphabetical order
 		isLetterExist := false
