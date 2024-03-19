@@ -33,3 +33,24 @@ func TestMapLookup(t *testing.T) {
 	tlookupMap(t, &ftm, "alphaph", false)
 	tlookupMap(t, &ftm, "alphapha", true)
 }
+
+func TestMapReverseLookup(t *testing.T) {
+	te := Trie{}
+	te.Init()
+
+	words := []string{}
+
+	for _, word := range words {
+		te.Insert(word)
+	}
+	insertNotInAlphabeticalOrder(&te)
+
+	ftm := FrozenTrieMap{}
+	ftm.Create(te)
+
+	// for i := range words {
+	for i := 0; i < 7; i++ {
+		key := ftm.ReverseLookup(uint(i + 1))
+		t.Log(key)
+	}
+}

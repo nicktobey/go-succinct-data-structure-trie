@@ -67,6 +67,18 @@ func (f *FrozenTrieMap) LookupIndex(word string) (index uint, found bool) {
 	return f.keys.Rank(1, node.index), node.final
 }
 
+func (f *FrozenTrieMap) ReverseLookup(keyIndex uint) (word string) {
+	var resultBytes []byte
+	trieNodeNumber := f.keys.Select(1, keyIndex)
+	for trieNodeNumber > 0 {
+		node := f.ft.GetNodeByIndex(trieNodeNumber)
+		resultBytes = append([]byte{node.letter}, resultBytes...)
+		parentOffset := f.ft.directory.Select(1, trieNodeNumber+1)
+		trieNodeNumber = f.ft.directory.Rank(0, parentOffset) - 1
+	}
+	return string(resultBytes)
+}
+
 func (f *FrozenTrieMap) GetBuffer() []byte {
 	var result bytes.Buffer
 	result.WriteString(f.ft.data.GetData())
