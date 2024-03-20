@@ -88,9 +88,6 @@ func (f *FrozenTrieMap) GetBuffer() []byte {
 
 func (f *FrozenTrieMap) GetOffsets() []byte {
 	var result bytes.Buffer
-	nodeCount := (f.ft.letterStart - 1) / 2
-	// TODO: This assumes fewer than 256 nodes.
-	result.WriteByte(byte(nodeCount))
 	result.WriteString(f.keys.data.GetData())
 	result.WriteString(f.keys.directory.GetData())
 	return result.Bytes()
