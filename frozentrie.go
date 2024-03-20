@@ -1,5 +1,7 @@
 package bits
 
+import "bytes"
+
 /*
 *
 
@@ -161,5 +163,19 @@ func (t *FrozenTrie) Apply(fn func(FrozenTrieNode)) {
 			level = append(level, node.GetChild(i))
 		}
 		fn(node)
+	}
+}
+
+func (t *FrozenTrie) GetLastLexographicKey() string {
+	var result bytes.Buffer
+	node := t.GetRoot()
+
+	for {
+		childCount := node.GetChildCount()
+		if childCount == 0 {
+			return result.String()
+		}
+		node = node.GetChild(childCount - 1)
+		result.Write([]byte{node.letter})
 	}
 }
