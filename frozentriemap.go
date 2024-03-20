@@ -15,7 +15,7 @@ FrozenTrieMap maps words in a trie onto indices.
 	@param nodeCount The number of nodes in the trie.
 */
 type FrozenTrieMap struct {
-	ft    FrozenTrie
+	Ft    FrozenTrie
 	keys  RankDirectory
 	words uint
 }
@@ -26,9 +26,9 @@ func (f *FrozenTrieMap) Create(trie Trie) {
 	teData := trie.Encode()
 	rd := CreateRankDirectory(teData, trie.GetNodeCount()*2+1, L1, L2)
 
-	f.ft.Init(teData, rd.GetData(), trie.GetNodeCount())
+	f.Ft.Init(teData, rd.GetData(), trie.GetNodeCount())
 
-	f.ft.Apply(func(node FrozenTrieNode) {
+	f.Ft.Apply(func(node FrozenTrieNode) {
 		if node.final {
 			finalNodes.Write(1, 1)
 			f.words++
@@ -41,12 +41,12 @@ func (f *FrozenTrieMap) Create(trie Trie) {
 }
 
 func (f *FrozenTrieMap) Init(ft FrozenTrie, keys RankDirectory) {
-	f.ft = ft
+	f.Ft = ft
 	f.keys = keys
 }
 
 func (f *FrozenTrieMap) LookupIndex(word string) (index uint, found bool) {
-	node := f.ft.GetRoot()
+	node := f.Ft.GetRoot()
 	wordBytes := []byte(word)
 	for _, i := range wordBytes {
 		var child FrozenTrieNode
@@ -71,18 +71,18 @@ func (f *FrozenTrieMap) ReverseLookup(keyIndex uint) (word string) {
 	var resultBytes []byte
 	trieNodeNumber := f.keys.Select(1, keyIndex)
 	for trieNodeNumber > 0 {
-		node := f.ft.GetNodeByIndex(trieNodeNumber)
+		node := f.Ft.GetNodeByIndex(trieNodeNumber)
 		resultBytes = append([]byte{node.letter}, resultBytes...)
-		parentOffset := f.ft.directory.Select(1, trieNodeNumber+1)
-		trieNodeNumber = f.ft.directory.Rank(0, parentOffset) - 1
+		parentOffset := f.Ft.directory.Select(1, trieNodeNumber+1)
+		trieNodeNumber = f.Ft.directory.Rank(0, parentOffset) - 1
 	}
 	return string(resultBytes)
 }
 
 func (f *FrozenTrieMap) GetBuffer() []byte {
 	var result bytes.Buffer
-	result.WriteString(f.ft.data.GetData())
-	result.WriteString(f.ft.directory.GetData())
+	result.WriteString(f.Ft.data.GetData())
+	result.WriteString(f.Ft.directory.GetData())
 	return result.Bytes()
 }
 
