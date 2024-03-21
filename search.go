@@ -59,7 +59,9 @@ func (f *FrozenTrie) traverseSubTrie(node FrozenTrieNode, prefix string, limit i
 		for ; i < nodeNow.GetChildCount(); i++ {
 			child := nodeNow.GetChild(i)
 			level = append(level, child)
-			prefixLevel = append(prefixLevel, append(prefixNow, child.letter))
+			newPrefix := make([]byte, 0, len(prefixNow)+1)
+			newPrefix = append(newPrefix, prefixNow...)
+			prefixLevel = append(prefixLevel, append(newPrefix, child.letter))
 		}
 	}
 
