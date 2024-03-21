@@ -137,7 +137,7 @@ func (f *TrieNode) ApplyPreOrder(fn func(*TrieNode)) {
 	Encode the trie and all of its nodes. Returns a string representing the
 	encoded data.
 */
-func (t *Trie) Encode() string {
+func (t *Trie) Encode() (encoding string, numKeys uint) {
 	// Write the unary encoding of the tree in level order.
 	bits := BitWriter{}
 	bits.Write(0x02, 2)
@@ -153,6 +153,7 @@ func (t *Trie) Encode() string {
 	// one of the characters of the alphabet.
 	t.Apply(func(node *TrieNode) {
 		if node.final {
+			numKeys++
 			bits.Write(1, 1)
 		} else {
 			bits.Write(0, 1)
@@ -161,5 +162,5 @@ func (t *Trie) Encode() string {
 		bits.Write(uint(node.letter), dataBits-1)
 	})
 
-	return bits.GetData()
+	return bits.GetData(), numKeys
 }

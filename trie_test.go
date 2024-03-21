@@ -26,7 +26,7 @@ func TestTrie(t *testing.T) {
 	te := Trie{}
 	te.Init()
 	insertInAlphabeticalOrder(&te)
-	teData := te.Encode()
+	teData, _ := te.Encode()
 	t.Log(teData)
 	t.Log(te.GetNodeCount())
 	if teData != "v2qqqqqqqpIUjQA5JZyBZ4ggCKh55ZZgBA5ZZd5vIEl1wx8g8A" {

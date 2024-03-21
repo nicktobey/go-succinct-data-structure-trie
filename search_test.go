@@ -9,7 +9,7 @@ func TestSearch(t *testing.T) {
 	te := Trie{}
 	te.Init()
 	insertNotInAlphabeticalOrder(&te)
-	teData := te.Encode()
+	teData, _ := te.Encode()
 	rd := CreateRankDirectory(teData, te.GetNodeCount()*2+1, L1, L2)
 
 	ft := FrozenTrie{}

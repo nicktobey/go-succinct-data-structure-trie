@@ -15,7 +15,7 @@ func TestLookup(t *testing.T) {
 	insertNotInAlphabeticalOrder(&te)
 	finalNodes := BitWriter{}
 
-	teData := te.Encode()
+	teData, _ := te.Encode()
 	rd := CreateRankDirectory(teData, te.GetNodeCount()*2+1, L1, L2)
 
 	ft := FrozenTrie{}
