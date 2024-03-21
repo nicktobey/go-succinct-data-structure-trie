@@ -46,11 +46,12 @@ func TestMapReverseLookup(t *testing.T) {
 	insertNotInAlphabeticalOrder(&te)
 
 	ftm := FrozenTrieMap{}
-	ftm.Create(te)
+	teData, numKeys := te.Encode()
+	ftm.Create(teData, te.GetNodeCount())
 
 	// for i := range words {
-	for i := 0; i < 7; i++ {
-		key := ftm.ReverseLookup(uint(i + 1))
+	for i := uint(0); i < numKeys; i++ {
+		key := ftm.ReverseLookup(i + 1)
 		t.Log(key)
 	}
 }
