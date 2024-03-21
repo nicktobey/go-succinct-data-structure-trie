@@ -55,6 +55,9 @@ func (bs *BitString) GetData() string {
 */
 func (bs *BitString) Get(p, n uint) uint {
 
+	if n == 0 {
+		return 0
+	}
 	// case 1: bits lie within the given byte
 	if (p%W)+n <= W {
 		idx := p/W | 0
