@@ -20,13 +20,12 @@ type FrozenTrieMap struct {
 	words uint
 }
 
-func (f *FrozenTrieMap) Create(trie Trie) {
+func (f *FrozenTrieMap) Create(teData string, nodeCount uint) {
 	finalNodes := BitWriter{}
 
-	teData := trie.Encode()
-	rd := CreateRankDirectory(teData, trie.GetNodeCount()*2+1, L1, L2)
+	rd := CreateRankDirectory(teData, nodeCount*2+1, L1, L2)
 
-	f.Ft.Init(teData, rd.GetData(), trie.GetNodeCount())
+	f.Ft.Init(teData, rd.GetData(), nodeCount)
 
 	f.Ft.Apply(func(node FrozenTrieNode) {
 		if node.final {
@@ -37,7 +36,7 @@ func (f *FrozenTrieMap) Create(trie Trie) {
 		}
 	})
 
-	f.keys = CreateRankDirectory(finalNodes.GetData(), trie.GetNodeCount(), L1, L2)
+	f.keys = CreateRankDirectory(finalNodes.GetData(), nodeCount, L1, L2)
 }
 
 func (f *FrozenTrieMap) Init(ft FrozenTrie, keys RankDirectory) {
