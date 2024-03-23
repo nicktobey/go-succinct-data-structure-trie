@@ -75,26 +75,38 @@ func (t *Trie) Insert(word string) {
 
 	wordBytes := []byte(word)[commonRuneCount:]
 	for _, i := range wordBytes {
-		// fix the bug if words not inserted in alphabetical order
-		isLetterExist := false
-		for _, cld := range node.children {
-			if cld.letter == i {
-				t.cache = append(t.cache, cld)
-				node = cld
-				isLetterExist = true
+		passedLetter := false
+		var childIndex int
+		var cld *TrieNode
+		for childIndex, cld = range node.children {
+			if cld.letter >= i {
+				passedLetter = true
 				break
 			}
 		}
-		if isLetterExist {
+		if !passedLetter {
+			next := &TrieNode{
+				letter: i,
+				final:  false,
+			}
+			t.nodeCount++
+			node.children = append(node.children, next)
+			t.cache = append(t.cache, next)
+			node = next
 			continue
 		}
-
+		if cld.letter == i {
+			t.cache = append(t.cache, cld)
+			node = cld
+			continue
+		}
 		next := &TrieNode{
 			letter: i,
 			final:  false,
 		}
 		t.nodeCount++
-		node.children = append(node.children, next)
+		node.children = append(node.children[:childIndex+1], node.children[childIndex:]...)
+		node.children[childIndex] = next
 		t.cache = append(t.cache, next)
 		node = next
 	}
