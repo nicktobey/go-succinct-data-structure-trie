@@ -15,33 +15,27 @@ FrozenTrieMap maps words in a trie onto indices.
 	@param nodeCount The number of nodes in the trie.
 */
 type FrozenTrieMap struct {
-	Ft    FrozenTrie
-	keys  RankDirectory
-	words uint
+	Ft                        FrozenTrie
+	mapLevelOrderToInfixOrder map[uint]uint
+	mapInfixOrderToLevelOrder []uint
+	Words                     uint
 }
 
 func (f *FrozenTrieMap) Create(teData string, nodeCount uint) {
-	finalNodes := BitWriter{}
+
+	f.mapLevelOrderToInfixOrder = make(map[uint]uint)
+	// f.mapInfixOrderToLevelOrder = make([]uint)
 
 	rd := CreateRankDirectory(teData, nodeCount*2+1, L1, L2)
-
 	f.Ft.Init(teData, rd.GetData(), nodeCount)
 
-	f.Ft.Apply(func(node FrozenTrieNode) {
+	f.Ft.ApplyPreOrder(func(node *FrozenTrieNode) {
 		if node.final {
-			finalNodes.Write(1, 1)
-			f.words++
-		} else {
-			finalNodes.Write(0, 1)
+			f.mapInfixOrderToLevelOrder = append(f.mapInfixOrderToLevelOrder, node.index)
+			f.mapLevelOrderToInfixOrder[node.index] = f.Words
+			f.Words++
 		}
 	})
-
-	f.keys = CreateRankDirectory(finalNodes.GetData(), nodeCount, L1, L2)
-}
-
-func (f *FrozenTrieMap) Init(ft FrozenTrie, keys RankDirectory) {
-	f.Ft = ft
-	f.keys = keys
 }
 
 func (f *FrozenTrieMap) LookupIndex(word string) (index uint, found bool) {
@@ -63,12 +57,12 @@ func (f *FrozenTrieMap) LookupIndex(word string) (index uint, found bool) {
 		node = child
 	}
 
-	return f.keys.Rank(1, node.index), node.final
+	return f.mapLevelOrderToInfixOrder[node.index], node.final
 }
 
 func (f *FrozenTrieMap) ReverseLookup(keyIndex uint) (word string) {
 	var resultBytes []byte
-	trieNodeNumber := f.keys.Select(1, keyIndex)
+	trieNodeNumber := f.mapInfixOrderToLevelOrder[keyIndex]
 	for trieNodeNumber > 0 {
 		node := f.Ft.GetNodeByIndex(trieNodeNumber)
 		resultBytes = append([]byte{node.letter}, resultBytes...)
@@ -82,12 +76,5 @@ func (f *FrozenTrieMap) GetBuffer() []byte {
 	var result bytes.Buffer
 	result.WriteString(f.Ft.data.GetData())
 	result.WriteString(f.Ft.directory.GetData())
-	return result.Bytes()
-}
-
-func (f *FrozenTrieMap) GetOffsets() []byte {
-	var result bytes.Buffer
-	result.WriteString(f.keys.data.GetData())
-	result.WriteString(f.keys.directory.GetData())
 	return result.Bytes()
 }

@@ -166,6 +166,25 @@ func (t *FrozenTrie) Apply(fn func(FrozenTrieNode)) {
 	}
 }
 
+/*
+* Apply a function to each node, traversing the trie in pre-order.
+ */
+func (f *FrozenTrie) ApplyPreOrder(fn func(*FrozenTrieNode)) {
+	root := f.GetRoot()
+	root.ApplyPreOrder(fn)
+}
+
+/*
+* Apply a function to each node, traversing the trie in pre-order.
+ */
+func (f *FrozenTrieNode) ApplyPreOrder(fn func(*FrozenTrieNode)) {
+	fn(f)
+	for i := uint(0); i < f.childCount; i++ {
+		child := f.GetChild(i)
+		child.ApplyPreOrder(fn)
+	}
+}
+
 func (t *FrozenTrie) GetLastLexographicKey() string {
 	var result bytes.Buffer
 	node := t.GetRoot()

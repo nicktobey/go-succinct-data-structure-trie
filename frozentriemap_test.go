@@ -8,18 +8,16 @@ func tlookupMap(t *testing.T, ftm *FrozenTrieMap, word string, expected bool) {
 		t.Error(word)
 	}
 	t.Log(word, index, found)
-	if found {
-		t.Log(ftm.keys.Rank(1, index))
-	}
 }
 
 func TestMapLookup(t *testing.T) {
 	te := Trie{}
 	te.Init()
 	insertNotInAlphabeticalOrder(&te)
+	teData, _ := te.Encode()
 
 	ftm := FrozenTrieMap{}
-	ftm.Create(te)
+	ftm.Create(teData, te.GetNodeCount())
 
 	tlookupMap(t, &ftm, "apple", true)
 	tlookupMap(t, &ftm, "appl", false)

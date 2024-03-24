@@ -137,10 +137,10 @@ func (t *Trie) Apply(fn func(*TrieNode)) {
 * Apply a function to each node, traversing the trie in pre-order.
  */
 func (f *TrieNode) ApplyPreOrder(fn func(*TrieNode)) {
+	fn(f)
 	for _, child := range f.children {
 		child.ApplyPreOrder(fn)
 	}
-	fn(f)
 }
 
 /*
